@@ -1,6 +1,7 @@
 import * as vscode from 'vscode'
 import { Controller } from './controller'
-import {Logger} from './logging'
+import { SequenceDiagramViewProvider } from './sequence-diagram-view-provider'
+import { Logger } from './logging'
 
 export const output = vscode.window.createOutputChannel('PySequenceReverse')
 
@@ -25,11 +26,20 @@ const getDefaultProgressOptions = (title: string): vscode.ProgressOptions => {
  */
 export function activate(context: vscode.ExtensionContext) {
 
+    const provider = new SequenceDiagramViewProvider(context.extensionUri);
+    context.subscriptions.push(
+        vscode.window.registerWebviewViewProvider(
+            // 👇 package.jsonに記述したviewsのidを設定する 👇
+            "myExtension.view",
+            provider,
+        ),
+    );
     const commandDisposable = vscode.commands.registerCommand(
         'PySequenceReverse.createSequenceDiagram',
         async () => {
             vscode.window.withProgress(
                 getDefaultProgressOptions('Generate sequence diagram'),
+
                 new Controller().generateSequenceDiagram(context)
             )
         }

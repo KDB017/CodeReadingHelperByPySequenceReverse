@@ -22,8 +22,24 @@ export class Controller {
     public generateSequenceDiagram = (context: vscode.ExtensionContext) => {
         return async () => {
             const entries: vscode.CallHierarchyItem[] = await CodeAnalyzer.getSelectedFunctions()                    
-            await this.createSequenceDiagram(entries[0]);
+            await this.createSequenceDiagramByMermaidCode(entries[0]);
         }
+    }
+
+    // ****************************************************************************************************************************
+    /**
+     * Generates a call hierarchy diagram,and  MermaidCode.
+     * @param root - The root CallHierarchyItem to start the diagram generation.
+     * @return string MermaidCode
+     */
+    public async createSequenceDiagramByMermaidCode(root: CallHierarchyItem) {
+        // Build the call hierarchy and populate the participants and messages lists
+        let sdm = new SequenceDiagramModel(root);
+        sdm = await new CallAnalyzer().sequenceCalls(sdm);
+
+        // Have the diagram text composed
+        await sdm.composeDiagram();
+        return sdm.contents();
     }
 
     // ****************************************************************************************************************************

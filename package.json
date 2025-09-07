@@ -32,6 +32,24 @@
                 }
             ]
         },
+        "views": {
+            "Sequence-Diagram": [
+                {
+                    "type": "webview",
+                    "id": "myExtension.view",
+                    "name": "Sequecne Diagram"
+                }
+            ]
+        },
+        "viewsContainers": {
+            "activitybar": [
+                {
+                    "id": "Sequence-Diagram",
+                    "title": "WebView",
+                    "icon": "icons/sequence.svg"
+                }
+            ]
+        },
         "configuration": {
             "title": "PySequenceReverse",
             "properties": {
