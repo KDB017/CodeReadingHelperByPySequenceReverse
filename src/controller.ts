@@ -5,6 +5,10 @@ import { SequenceDiagramModel } from './entities';
 import { CallAnalyzer } from './call-analyzer';
 import { DocumentManager } from './document-manager';
 import { CodeAnalyzer } from './code-analyzer';
+import { Logger } from './logging'
+import { SequenceDiagramViewProvider } from './sequence-diagram-view-provider'
+
+
 
 // ################################################################################################################################
 /**
@@ -12,7 +16,13 @@ import { CodeAnalyzer } from './code-analyzer';
  * Manages the generation, saving, and previewing of diagrams.
  */
 export class Controller {
-    
+
+
+    private sequenceDiagramViewProvider: SequenceDiagramViewProvider;
+
+    constructor(sequenceDiagramViewProvider: SequenceDiagramViewProvider) {
+        this.sequenceDiagramViewProvider = sequenceDiagramViewProvider;
+    }
     // ****************************************************************************************************************************
     /**
      * Generates a sequence diagram based on selected functions.
@@ -22,24 +32,25 @@ export class Controller {
     public generateSequenceDiagram = (context: vscode.ExtensionContext) => {
         return async () => {
             const entries: vscode.CallHierarchyItem[] = await CodeAnalyzer.getSelectedFunctions()                    
-            await this.createSequenceDiagramByMermaidCode(entries[0]);
+            await this.createSequenceDiagramByWebView(entries[0]);
         }
     }
 
     // ****************************************************************************************************************************
     /**
-     * Generates a call hierarchy diagram,and  MermaidCode.
+     * Generates a call hierarchy diagram,and overwrite MermaidCode of WebView.
      * @param root - The root CallHierarchyItem to start the diagram generation.
-     * @return string MermaidCode
+     * 
      */
-    public async createSequenceDiagramByMermaidCode(root: CallHierarchyItem) {
+    public async createSequenceDiagramByWebView(root: CallHierarchyItem) {
         // Build the call hierarchy and populate the participants and messages lists
         let sdm = new SequenceDiagramModel(root);
         sdm = await new CallAnalyzer().sequenceCalls(sdm);
 
         // Have the diagram text composed
         await sdm.composeDiagram();
-        return sdm.contents();
+        // this.sequenceDiagramViewProvider.setMermaidCode(sdm.contents());
+        this.sequenceDiagramViewProvider.updateDiagram(sdm.contents());
     }
 
     // ****************************************************************************************************************************

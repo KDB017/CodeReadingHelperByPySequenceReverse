@@ -24,14 +24,38 @@ const getDefaultProgressOptions = (title: string): vscode.ProgressOptions => {
  * Activates the extension and registers a command to create a sequence diagram.
  * @param context - The VS Code extension context.
  */
+// export function activate(context: vscode.ExtensionContext) {
+
+//     const provider = new SequenceDiagramViewProvider(context.extensionUri);
+//     context.subscriptions.push(
+//         vscode.window.registerWebviewViewProvider(
+//             // 👇 package.jsonに記述したviewsのidを設定する 👇
+//             "myExtension.view",
+//             provider,
+//         ),
+//     );
+//     const commandDisposable = vscode.commands.registerCommand(
+//         'PySequenceReverse.createSequenceDiagram',
+//         async () => {
+//             vscode.window.withProgress(
+//                 getDefaultProgressOptions('Generate sequence diagram'),
+
+//                 new Controller().generateSequenceDiagram(context)
+//             )
+//         }
+//     )
+//     context.subscriptions.push(commandDisposable)
+
+// }
+
 export function activate(context: vscode.ExtensionContext) {
 
-    const provider = new SequenceDiagramViewProvider(context.extensionUri);
+    let webviewProvider = new SequenceDiagramViewProvider(context.extensionUri);
     context.subscriptions.push(
         vscode.window.registerWebviewViewProvider(
             // 👇 package.jsonに記述したviewsのidを設定する 👇
             "myExtension.view",
-            provider,
+            webviewProvider,
         ),
     );
     const commandDisposable = vscode.commands.registerCommand(
@@ -40,7 +64,7 @@ export function activate(context: vscode.ExtensionContext) {
             vscode.window.withProgress(
                 getDefaultProgressOptions('Generate sequence diagram'),
 
-                new Controller().generateSequenceDiagram(context)
+                new Controller( webviewProvider).generateSequenceDiagram(context)
             )
         }
     )
