@@ -1,11 +1,11 @@
 import * as vscode from 'vscode';
-import { Logger } from './logging'
 
 export class SequenceDiagramViewProvider implements vscode.WebviewViewProvider {
     private _view?: vscode.WebviewView;
-    private _mermaidCode: string = 'sequenceDiagram\n    Alice->>Bob: Hello Bob, how are you?\n    Bob-->>Alice: I am good thanks!';
+    private _mermaidCode: string = '';
 
-    constructor(private readonly extensionUri: vscode.Uri) { }
+    constructor(private readonly extensionUri: vscode.Uri) {
+     }
 
     public resolveWebviewView(webviewView: vscode.WebviewView) {
         this._view = webviewView;

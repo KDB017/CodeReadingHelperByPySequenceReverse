@@ -86,7 +86,7 @@ export class CodeAnalyzer {
             if (lineIndentation < currentIndentation && line.trim().startsWith('class ')) {
                 
                 // Extract the class name from the class definition
-                const classNameMatch = line.match(/class\s+([^\(:]+)/);
+                const classNameMatch = line.match(/class\s+([^(:]+)/);
                 return classNameMatch ? classNameMatch[1].trim() : undefined;
             }
 
@@ -211,7 +211,7 @@ export class CodeAnalyzer {
             const reversedLineContents = lineContentsBeforeFunctionName.split('').reverse().join('');
             
             // Check if the reversed line begins.with.object.qualification
-            const reversedQualifierMatch = reversedLineContents.match(/[a-zA-Z0-9_\.]+/)
+            const reversedQualifierMatch = reversedLineContents.match(/[a-zA-Z0-9_.]+/)
                         
             if (reversedQualifierMatch !== null) { // Yay, this is an object
                 // Take the first match and reverse it to restore the original spelling. Remove references to self as well.

@@ -3,7 +3,7 @@
     "displayName": "PySequenceReverse Sequence Diagram Builder for Python",
     "description": "Create Mermaid speaking sequence diagrams for Python functions",
     "version": "1.1.0",
-    "publisher": "t1nker",
+    "publisher": "kazu",
     "engines": {
         "vscode": "^1.65.0",
         "node": ">=14.0.0"
@@ -93,10 +93,10 @@
                     "type": "boolean",
                     "default": false
                 },
-                "py-sequence-reverse.Diagram: Omit Sequence Numbers": {
-                    "description": "Check to omit sequence numbers from messages",
+                "py-sequence-reverse.Diagram: include Sequence Numbers": {
+                    "description": "Check to include sequence numbers in messages",
                     "type": "boolean",
-                    "default": false
+                    "default": true
                 },
                 "py-sequence-reverse.Diagram: Show Signatures Instead Parameters": {
                     "description": "Check to include the signature of the called function rather than parameter values (only applies when parameters are not omitted).",

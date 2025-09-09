@@ -22,7 +22,7 @@ class SkipCheckResult {
      * Tells if a given call shall be skipped from further analysis and the sequence diagrams.
      */
     public readonly skip: boolean = false;
-    
+
     /**
      * The reason for skipping if `skip` is true, empty otherwise.
      */
@@ -56,7 +56,7 @@ export class CallAnalyzer {
      */
     protected static roots(): string[] {
         return vscode.workspace.workspaceFolders?.map((f) => f.uri.toString()) ?? []
-    } 
+    }
 
     // ****************************************************************************************************************************
     /**
@@ -99,23 +99,23 @@ export class CallAnalyzer {
 
         this.maxCallDepth = vscode.workspace.getConfiguration().get<number>('py-sequence-reverse.Diagram: Max Call Depth') ?? 32
         // Start traversal and obtain sequence messages for the diagram
-        const subject = sequenceDiagramModel.functionAnalyzed()        
+        const subject = sequenceDiagramModel.functionAnalyzed()
         const sequenceMessages = await this.traverse(sequenceDiagramModel.functionAnalyzed(), `${subject.name}()`, "", 0)
 
         // Add the obtained messages to the diagram, if there is any
         this.messages?.push(...sequenceMessages ?? [])
-        
+
         this.optimizeReferences();
 
         sequenceDiagramModel.participants = this.participants;
         sequenceDiagramModel.messages = this.messages;
 
-        Logger.logResetIndentation();            
-        
+        Logger.logResetIndentation();
+
         return sequenceDiagramModel;
     }
 
-   
+
     // ****************************************************************************************************************************
     /**
      * Traverses the call hierarchy, analyzes outgoing calls, and composes messages for sequence diagrams.
@@ -125,8 +125,8 @@ export class CallAnalyzer {
      * @param depth - The depth of the traversal.
      * @returns A Promise that resolves to an array of strings representing the composed messages.
      */
-    protected async traverse(node: CallHierarchyItem, myName: string, parentSequenceNumber: string, depth: number): Promise<string[] | undefined> {       
-            
+    protected async traverse(node: CallHierarchyItem, myName: string, parentSequenceNumber: string, depth: number): Promise<string[] | undefined> {
+
         // This function will
         // * investigate what calls are located in the given node, and
         // * create sequence diagram messages for these calls, furthermore
@@ -154,7 +154,7 @@ export class CallAnalyzer {
             //
             // For example, is foo() is called twice, from line 7 and line 13 of something(), while bar is called once from 
             // line 9, we need to reconstruct the sequence of foo(), bar(), foo().
-            
+
 
             // Declare stuff ------------------------------------------------------------------------------------------------------
             let calls: vscode.CallHierarchyOutgoingCall[] = [];
@@ -172,17 +172,17 @@ export class CallAnalyzer {
             const sortCalls = async (): Promise<vscode.CallHierarchyOutgoingCall[]> => {
 
                 // Map each call to a promise that resolves to an object containing the call and its CallItemInfo
-                const callsWithInfoPromises = 
+                const callsWithInfoPromises =
                     calls.map(
                         async call => ({
                             call,
                             info: await CodeAnalyzer.getCallItemInfo(node.uri, call.fromRanges[0], call.to)
                         })
                     );
-            
+
                 // Wait for all promises to resolve
                 const callsWithInfo = await Promise.all(callsWithInfoPromises);
-            
+
                 // Now sort the calls based on the desired criteria, for example, the start position of the fromRanges
                 callsWithInfo.sort((a, b) => {
 
@@ -195,8 +195,8 @@ export class CallAnalyzer {
                         // Call to 'a' is within the parameters of call 'b', so that call to 'a' is executed first
                         return -1;
 
-                    // From here no one contains the other so location decides
-                    //
+                        // From here no one contains the other so location decides
+                        //
                     } else if (a.call.fromRanges[0].start.isBefore(b.call.fromRanges[0].start)) {
                         // Call to a comes first
                         return -1;
@@ -208,19 +208,19 @@ export class CallAnalyzer {
                         return 0;
                     }
                 });
-            
+
                 // Extract the sorted calls
                 return calls = callsWithInfo.map(cwi => cwi.call);
             }
 
             // Body of flattenCalls -----------------------------------------------------------------------------------------------
-                    
+
             // Get the calls from VS Code. Note that calls to the same method are grouped
             const groupedCalls: vscode.CallHierarchyOutgoingCall[] = await vscode.commands.executeCommand('vscode.provideOutgoingCalls', node);
-            
+
             // Flatten out the list and make sure to have an item for all call locations as those may belong to different
             // objects and may come sooner or later in the sequence of calls
-            groupedCalls.forEach(gc => {                
+            groupedCalls.forEach(gc => {
                 gc.fromRanges.forEach(fr => {
                     if (!CallAnalyzer.shallCallBeSkipped(gc, gc.to).skip) {
                         calls.push(new vscode.CallHierarchyOutgoingCall(gc.to, [fr]))
@@ -234,7 +234,7 @@ export class CallAnalyzer {
             return calls;
         }
 
-       // ========================================================================================================================
+        // ========================================================================================================================
         /**
          * Composes the name of the participant (class or module) based on the URI and position.
          * @param uri - The URI of the document.
@@ -253,7 +253,7 @@ export class CallAnalyzer {
                 if (moduleName) {
                     participant.class = moduleName;
                 }
-            }                                    
+            }
 
             /**
              * Trims the workspace root path from a given URI or string.
@@ -269,7 +269,7 @@ export class CallAnalyzer {
 
             return participant;
         }
-        
+
         // ========================================================================================================================
         /**
          * Analyzes an outgoing call in the call hierarchy, composes messages for sequence diagrams, and handles nested calls.
@@ -286,32 +286,32 @@ export class CallAnalyzer {
             let afterNestedCalls: string[] = [];            // Collect diagram contents for the return call
             let nestedCalls: string[] | undefined = [];     // Contain the messages discovered when analyzing the called method
             let calledItem: CallHierarchyItem;              // This is the call hierarchy item at which the call is targeted
-                
+
             let message = "";                               // The message conveys. Contains the sequence number, the method name, and may contain params.
             let messageType: string = "";                   // The type of message for the call according to Mermaid specifications
             let returnMessageType: string = "";             // The type of message for the return call according to Mermaid specifications
-            
+
 
             // Compartments to compose comprehensive log items
             let whatsGoingOn = "";
             let callFromToken = "";
             let callToToken = "";
-            let callNameToken = "";            
+            let callNameToken = "";
 
             // Let's rock ---------------------------------------------------------------------------------------------------------
 
             whatsGoingOn += `Call ${callIx}`
 
             Logger.logIndent();
-                        
-            calledItem = call.to;                        
+
+            calledItem = call.to;
             callFromToken = Logger.hiMethod(node.name)
             callToToken = Logger.hiMethod(call.to.name)
             whatsGoingOn += ` from ${callFromToken} to ${callToToken}`
-            
+
 
             // Check if the call shall be skipped from further analysis -----------------------------------------------------------
-            
+
             const scr: SkipCheckResult = CallAnalyzer.shallCallBeSkipped(call, calledItem);
             if (scr.skip) {
                 whatsGoingOn += ` ${scr.reason} and is therefore skipped`;
@@ -323,25 +323,25 @@ export class CallAnalyzer {
 
 
             // Obtain information on the call -------------------------------------------------------------------------------------
-            
-            Logger.log(`Getting item info for ${calledItem.name} in ${calledItem.uri} at ${call.fromRanges[0].start.line}:${call.fromRanges[0].start.character}`)            
+
+            Logger.log(`Getting item info for ${calledItem.name} in ${calledItem.uri} at ${call.fromRanges[0].start.line}:${call.fromRanges[0].start.character}`)
             const callItemInfo: CallItemInfo = await CodeAnalyzer.getCallItemInfo(node.uri, call.fromRanges[0], call.to)
-            
+
             // Increase the last tag of the sequence number as we are about to add a message at the same level
             localSequenceNumberIx++;
-            
-            
+
+
             // Compose names for the caller ---------------------------------------------------------------------------------------
 
             // Find the name of the class and object from which the call originates and add it to the list of participants
             let caller: Participant = await identifyParticipant(node.uri, node.selectionRange.start);
             caller.object = myName;
-            
+
             caller = this.participants.add(caller);
 
 
             // Compose names for the callee ---------------------------------------------------------------------------------------
-            
+
             // Find the name of the class and object from which the call originates and add it to the list of participants
             let callee: Participant = await identifyParticipant(call.to.uri, call.to.selectionRange.start);
 
@@ -356,16 +356,16 @@ export class CallAnalyzer {
 
             // Add the callee object to the list of participants
             callee = this.participants.add(callee);
-            
 
-            
+
+
             // Build up message compartments --------------------------------------------------------------------------------------            
 
-            this.messageSequenceNumber = 
-                (parentSequenceNumber === "") 
-                ? `${localSequenceNumberIx.toString()}` 
-                : `${parentSequenceNumber}.${localSequenceNumberIx.toString()}`;
-            
+            this.messageSequenceNumber =
+                (parentSequenceNumber === "")
+                    ? `${localSequenceNumberIx.toString()}`
+                    : `${parentSequenceNumber}.${localSequenceNumberIx.toString()}`;
+
             message = call.to.name;
 
             if (caller.qualifiedName() === callee.qualifiedName()) {
@@ -379,21 +379,21 @@ export class CallAnalyzer {
             // Compartments for log message
             callFromToken = `${Logger.hiObject(caller.class)}.${callFromToken}`
             callToToken = Logger.hiObject(callee.class)
-            callNameToken = Logger.hiMethod(call.to.name)            
+            callNameToken = Logger.hiMethod(call.to.name)
 
             // Add messages -------------------------------------------------------------------------------------------------------
 
             // Outgoing call
             beforeNestedCalls.push(
                 `\t${caller.id} ${messageType} ${callee.id}: ${includeSequenceNumbers ? this.messageSequenceNumber + ":" : ""} ${message}${TextFormatter.wrapText(callItemInfo.parameters)}`);
-            
+
             // Return call
             let returnLabel = vscode.workspace.getConfiguration().get<boolean>('py-sequence-reverse.Diagram: Return Message Label') ?? "return value"
             if (returnLabel === "") { returnLabel = " "; }
             afterNestedCalls.unshift(
                 `\t${callee.id} ${returnMessageType} ${caller.id}: ${includeSequenceNumbers ? this.messageSequenceNumber : ""}: ${returnLabel}`);
 
-            Logger.log(`Call ${callIx} added as ${this.messageSequenceNumber}: ${callFromToken} ->> ${callToToken}: ${callNameToken}`); 
+            Logger.log(`Call ${callIx} added as ${this.messageSequenceNumber}: ${callFromToken} ->> ${callToToken}: ${callNameToken}`);
 
             // Process the callee unless depth limit is reached -------------------------------------------------------------------
 
@@ -404,16 +404,16 @@ export class CallAnalyzer {
                         `\tNote right of ${callee.id}: Further calls ignored for reaching max depth`
                     )
                 }
-            } 
+            }
 
             // Compose messages from compartments ---------------------------------------------------------------------------------
 
             let localMessages: string[] = [];
 
             // Inject messages from nested calls between the outgoing call and the return call message(s)
-            localMessages.push(...beforeNestedCalls);        
-            localMessages.push(...nestedCalls ?? []);        
-            localMessages.push(...afterNestedCalls);          
+            localMessages.push(...beforeNestedCalls);
+            localMessages.push(...nestedCalls ?? []);
+            localMessages.push(...afterNestedCalls);
 
             myMessages?.push(...localMessages);
 
@@ -421,14 +421,15 @@ export class CallAnalyzer {
         }
 
         // Body (of traverse) =====================================================================================================
-    
-        // Obtain a unique ID
-        const id  = `"${node.uri}#${node.name}@${node.range.start.line}:${node.range.start.character}"`
 
-        const includeSequenceNumbers: boolean = !vscode.workspace.getConfiguration().get<boolean>('py-sequence-reverse.Diagram: Omit Sequence Numbers') ?? true
-        
+        // Obtain a unique ID
+        const id = `"${node.uri}#${node.name}@${node.range.start.line}:${node.range.start.character}"`
+
+        const includeSequenceNumbers: boolean = vscode.workspace.getConfiguration().get<boolean>('py-sequence-reverse.Diagram: include Sequence Numbers') ?? false
+
+
         Logger.log(`Traversing ${Logger.hiMethod(node.name)}, PSEQ ${parentSequenceNumber}, FQN ${id}`)
-        
+
         const calls: vscode.CallHierarchyOutgoingCall[] = await flattenCalls();
 
         if (calls.length > 0 && depth === this.maxCallDepth) {
@@ -436,25 +437,25 @@ export class CallAnalyzer {
             return undefined
         }
 
-        Logger.logIndent()        
+        Logger.logIndent()
         Logger.log(`Call list obtained with ${calls.length} items`)
 
         // Init the sequence numbering of this level. We'll combine this with the parent sequence number to get a decimal breakdown structure
-        let localSequenceNumberIx: number = 0;        
+        let localSequenceNumberIx: number = 0;
 
         // Create a list to contain the messages for the sequence diagram originating from this method
         let myMessages: string[] = [];
-        
+
         let callIx: number = 0;
 
         // Process each call in order of location to identify participants and create sequence diagram messages
-        for (const call of calls) {                                
-            await analyzeCall(call, myMessages, ++callIx);
-        };
-        
+        for (const call of calls) {
+            await analyzeCall(call, myMessages, ++callIx)
+        }
+
         Logger.logOutdent();
 
-        return myMessages;        
+        return myMessages;
     }
 
     // ****************************************************************************************************************************
@@ -463,8 +464,8 @@ export class CallAnalyzer {
      * to make them as short as possible while maintaining uniqueness.
      * @returns void
      */
-    protected optimizeReferences(): void {        
-        
+    protected optimizeReferences(): void {
+
         if (!this.messages || this.messages.length === 0) {
             return;
         }
@@ -475,29 +476,35 @@ export class CallAnalyzer {
         // Remove the common part and make a copy of the participants list with pretty names        
         this.participants.forEach(participant => {
             let prettyName = participant.namespace.replace(commonRoot, "");
-            while (true) {
+            let keepTrimming = true;
+            while (keepTrimming) {
                 const evenPrettierName = prettyName.replace(commonRoot, "");
                 if (evenPrettierName === prettyName) {
-                    break;
+                    keepTrimming = false
                 }
-                prettyName = evenPrettierName;
-            }; 
+                else {
+                    prettyName = evenPrettierName;
+                }
+            }
 
             participant.namespace = prettyName;
         });
-        
+
         // Remove the common part and make a copy of the messages list with pretty names
         const prettyMessages: string[] = [""];
         this.messages.forEach(message => {
             let prettyName = message.replace(commonRoot, "");
-            while (true) {
+            let keepTrimming = true;
+            while (keepTrimming) {
                 const evenPrettierName = prettyName.replace(commonRoot, "");
                 if (evenPrettierName === prettyName) {
-                    break;
+                    keepTrimming = false;
                 }
-                prettyName = evenPrettierName;
-            } 
-            
+                else{
+                    prettyName = evenPrettierName;
+                }
+            }
+
             prettyMessages.push(prettyName);
         });
 
@@ -520,27 +527,27 @@ export class CallAnalyzer {
         // Check link/call type -----------------------------------------------------------------------------------------------
 
         // Don't follow links which doesn't count function calls as per the call hierarchy provider's understandings
-        if (!(  call.to.kind === vscode.SymbolKind.Method
-            ||  call.to.kind === vscode.SymbolKind.Function
-            ||  call.to.kind === vscode.SymbolKind.Property
+        if (!(call.to.kind === vscode.SymbolKind.Method
+            || call.to.kind === vscode.SymbolKind.Function
+            || call.to.kind === vscode.SymbolKind.Property
         )) {
             return new SkipCheckResult(true, "is not a function call");
         }
 
 
         // Check ignore globals option ----------------------------------------------------------------------------------------
-        
+
         const ignoreGlobs = configs.get<string[]>('py-sequence-reverse.Ignore: Ignore on Generate') ?? []
 
         for (const glob of ignoreGlobs) { // Some globals are requested to be ignored from the diagram
-            if (minimatch(calledItem.uri.fsPath, glob)) {                    
+            if (minimatch(calledItem.uri.fsPath, glob)) {
                 return new SkipCheckResult(true, "involves ignored globals");
             }
         }
 
 
         // Check ignore non-workspace files option ---------------------------------------------------------------------------
-        
+
         const ignoreNonWorkspaceFiles = configs.get<boolean>('py-sequence-reverse.Ignore: Ignore Non-Workspace Files') ?? false
 
         if (ignoreNonWorkspaceFiles) { // Methods located in files out of the workspace folders shall be excluded
@@ -573,31 +580,31 @@ export class CallAnalyzer {
             // Start building paths to exclude by adding the default ones
             let builtinPackagesPaths: string[] = [dotVenv, dotConda];
 
-            const pythonSettings = vscode.workspace.getConfiguration('python');    
-            
+            const pythonSettings = vscode.workspace.getConfiguration('python');
+
             if (pythonSettings) {
-                
+
                 // Check if Python path is set and add it to the list of paths to exclude
-                const pyPath = pythonSettings.get('pythonPath');     
+                const pyPath = pythonSettings.get('pythonPath');
                 if (pyPath && typeof pyPath === 'string') {
                     builtinPackagesPaths.push(pyPath.toString())
                 }
 
                 // Check if 'Python: Venv folders' are specified, and add each to the list of paths to exclude
                 const venvFolders = pythonSettings.get<string[]>('venvFolders') ?? [];
-                for (const folder of venvFolders ?? []) {        
+                for (const folder of venvFolders ?? []) {
                     builtinPackagesPaths.push(folder)
                 }
 
                 // Check if 'Python: Venv Path' is defined and add it to the list of paths to exclude
-                const venvPath = pythonSettings.get('venvPath');     
+                const venvPath = pythonSettings.get('venvPath');
                 if (venvPath && typeof venvPath === 'string') {
                     // Be prepared users may list multiple paths separated by comma or semicolon
                     for (const pathItem of venvPath.toString().split(/[;,]/)) {
                         builtinPackagesPaths.push(pathItem)
                     }
-                    
-                }        
+
+                }
             }
 
             // With paths collected, see if the call's URI is on one of the paths or not
@@ -611,10 +618,10 @@ export class CallAnalyzer {
             if (isInVenv) {
                 return new SkipCheckResult(true, "goes to (v)env module");
             }
-        }            
+        }
 
         return new SkipCheckResult(false, "");
-    }    
+    }
 
 }
 
