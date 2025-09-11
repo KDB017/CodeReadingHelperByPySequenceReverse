@@ -20,17 +20,17 @@ export class Logger {
         Logger.currentLogIndentationLevel = 0;
     }
 
-    private static Colors = class {
-        public static readonly Yellow = '\x1b[33m'; // ANSI code for yellow
-        public static readonly Green = '\x1b[32m'; // ANSI code for green
-        public static readonly Default = '\x1b[0m'; // ANSI code to reset color 
-    }
+    private static colors = class {
+    public static readonly yellow = '\x1b[33m'; // ANSI code for yellow
+    public static readonly green = '\x1b[32m';  // ANSI code for green
+    public static readonly reset = '\x1b[0m';   // ANSI code to reset color 
+}
     
     public static hiMethod(methodName: string) {
-        return (`${Logger.Colors.Yellow}${methodName}()${Logger.Colors.Default}`);
+        return (`${Logger.colors.yellow}${methodName}()${Logger.colors.reset}`);
     }
 
     public static hiObject(objectName: string) {
-        return (`${Logger.Colors.Green}${objectName}${Logger.Colors.Default}`); 
+        return (`${Logger.colors.green}${objectName}${Logger.colors.reset}`);
     }
 }

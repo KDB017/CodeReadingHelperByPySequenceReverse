@@ -4,8 +4,6 @@ import * as path from 'path';
 import sanitize = require('sanitize-filename');
 
 import { SequenceDiagramModel } from './entities';
-import { CallAnalyzer } from './call-analyzer';
-import { CodeAnalyzer } from './code-analyzer';
 
 // ################################################################################################################################
 export class DocumentManager {

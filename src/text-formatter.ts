@@ -62,7 +62,7 @@ export class TextFormatter {
 
                     lineBroken = 
                         position >= text.length - 1 
-                        || text.charAt(position).match(/[\s\[\.,\:\(\)\{]/) !== null;
+                        || text.charAt(position).match(/[\s[.,:(){]/) !== null;
 
                     if (lineBroken) {
                         chunkEndsAt = position;
@@ -77,7 +77,7 @@ export class TextFormatter {
                     while (
                         ++ix < limit 
                         && !canBreakLineAtPosition(chunkStartsAt + 1 + lengthAbout + ix)) {
-                        ;
+                            continue;
                     }
                 }
 
@@ -89,7 +89,7 @@ export class TextFormatter {
                     while (
                         --ix > -1 * Math.min(TextFormatter.softWrappingLimit, chunkEndsAt - chunkStartsAt) 
                         && !canBreakLineAtPosition(chunkStartsAt + 1 + lengthAbout + ix)) {
-                        ;
+                            continue;
                     }
                 }
 

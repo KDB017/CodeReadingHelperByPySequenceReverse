@@ -1,5 +1,5 @@
 import * as vscode from 'vscode'
-import sanitize = require('sanitize-filename');
+// import sanitize = require('sanitize-filename');
 import { CallAnalyzer } from './call-analyzer';
 import { CodeAnalyzer } from './code-analyzer';
 
@@ -94,9 +94,7 @@ export class Participants extends Map<string, Participant> {
 
         this.set(participant.uniqueName(), participant);        
         return this.get(participant.uniqueName()) || participant;
-    }
-
-    /**
+    }/**
      * Sets a key-value pair in the Participants collection, assigns an ID to the Participant if it's new, and returns the collection for chaining.
      * 
      * This method sets a key-value pair in the Participants collection. If the Participant with the unique name does not exist in the collection,
@@ -106,6 +104,8 @@ export class Participants extends Map<string, Participant> {
      * @param value - The Participant object to set in the collection.
      * @returns The Participants collection for chaining purposes.
      */
+
+    
     public set(key: string, value: Participant): this {
         
         if (!this.has(value.uniqueName())) {
