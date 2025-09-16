@@ -2,6 +2,7 @@ import * as vscode from 'vscode'
 // import sanitize = require('sanitize-filename');
 import { CallAnalyzer } from './call-analyzer';
 import { CodeAnalyzer } from './code-analyzer';
+import { Logger } from './logging';
 
 // ################################################################################################################################
 /**
@@ -37,7 +38,7 @@ export class Participant {
     public qualifiedName(): string {
         return this.namespace.length === 0 ? `${this.class}` : `${this.namespace}/${this.class}`;
     }
-    
+
     /**
      * Generates a unique name by combining the qualified name and alias.     
      * 
@@ -60,7 +61,7 @@ export class Participant {
     public uniqueName(): string {
         return `${this.qualifiedName()}:${this.alias()}`;
     }
-            
+
 }
 
 /**
@@ -92,7 +93,7 @@ export class Participants extends Map<string, Participant> {
      */
     public add(participant: Participant): Participant {
 
-        this.set(participant.uniqueName(), participant);        
+        this.set(participant.uniqueName(), participant);
         return this.get(participant.uniqueName()) || participant;
     }/**
      * Sets a key-value pair in the Participants collection, assigns an ID to the Participant if it's new, and returns the collection for chaining.
@@ -105,14 +106,14 @@ export class Participants extends Map<string, Participant> {
      * @returns The Participants collection for chaining purposes.
      */
 
-    
+
     public set(key: string, value: Participant): this {
-        
+
         if (!this.has(value.uniqueName())) {
-            value.id = `p${++this.uid}`;        
+            value.id = `p${++this.uid}`;
             super.set(value.uniqueName(), value);
-        } 
-        
+        }
+
         // Return 'this' to maintain chaining compatibility
         return this;
     }
@@ -146,7 +147,7 @@ export class SequenceDiagramModel {
     public functionAnalyzed(): vscode.CallHierarchyItem { return this._functionAnalyzed; }
     protected _functionAnalyzed: vscode.CallHierarchyItem;
 
-    
+
     /**
      * Retrieves the common root path of the workspace folders.
      * 
@@ -163,7 +164,7 @@ export class SequenceDiagramModel {
      * 
      * @returns A string representing the name of the class.
      */
-    public className(): string { return this._className; }    
+    public className(): string { return this._className; }
     protected _className: string = ""
 
     /**
@@ -175,7 +176,7 @@ export class SequenceDiagramModel {
     public title(): string { return this._title; }
     protected _title: string = "";
 
-    
+
     /**
      * Retrieves the Mermaid-speaking contents of the represented sequence diagram.
      * 
@@ -203,13 +204,13 @@ export class SequenceDiagramModel {
      * @returns {Promise<string>} A Promise that resolves with the composed sequence diagram string.
      */
     public async composeDiagram(): Promise<string> {
-        
+
         this._workspaceRoot = CallAnalyzer.workspaceRoot();
         this._className = await CodeAnalyzer.findClassName(this.functionAnalyzed().uri, this.functionAnalyzed().range.start) || "";
-        this._title = 
+        this._title =
             `Sequence diagram of ${this.className()}.${this.functionAnalyzed().name}()` +
-            ` of ${this.functionAnalyzed().uri.toString().replace(this.workspaceRoot(), "")}`        
-                
+            ` of ${this.functionAnalyzed().uri.toString().replace(this.workspaceRoot(), "")}`
+
         const participantsStr = [...this.participants.values()].map(p => `    participant ${p.id} as ${p.alias()}`).join('\n');
         const messagesStr = this.messages.join('\n');
 
@@ -224,10 +225,50 @@ export class SequenceDiagramModel {
             
             ${messagesStr}
         `.replace(/^\s{12,13}/gm, "\n");
-        
-        this._contents = combinedStr;
 
+
+        this._contents = combinedStr;
+        const test = this.numberOfTimesTheFunctionIsCalled(combinedStr)
         return combinedStr;
+    }
+
+
+    public numberOfTimesTheFunctionIsCalled(mermaidCodeExcludingColorSettings: string) {
+
+        // Create a map to hold participant IDs and their corresponding names
+        // let participantMap: Record<string, string> = {};
+        // const participantRegex = /^\s*participant\s+(\w+)(?:\s+as\s+(\w+))?/gm;
+        // let match = null;
+        // while ((match = participantRegex.exec(mermaidCodeExcludingColorSettings)) !== null) {
+        //     let key = match[1];
+        //     let value = match[2] || match[1];
+        //     Logger.log("match:" + JSON.stringify(match));
+        //     participantMap[key] = value;
+        // }
+
+
+        // Logger.log("participantMap:" + JSON.stringify(participantMap));
+        // Logger.log("mermaidCodeExcludingColorSettings:" + mermaidCodeExcludingColorSettings);
+
+        // const callRegex = /p(\d+) -+>>[+-] p(\d+):\s*(\w+)\(/gm;
+        // let callMatch;
+        // let callCount: Record<string, number> = {};
+
+        // while ((callMatch = callRegex.exec(mermaidCodeExcludingColorSettings)) !== null) {
+        //     Logger.log("callMatch:" + JSON.stringify(callMatch));
+        //     const from = callMatch[1];
+        //     const to = callMatch[2];
+        //     const func = callMatch[3];  // foo, bar など
+
+        //     // 呼び出し回数をカウント
+        //     callCount[func] = (callCount[func] ?? 0) + 1;
+
+        //     Logger.log(`${participantMap[from] ?? from} -> ${participantMap[to] ?? to}: ${func}()`);
+        // }
+
+        // Logger.log("callCount:" + JSON.stringify(callCount));
+        Logger.log("mermaidCodeExcludingColorSettings:" + mermaidCodeExcludingColorSettings.split("\n"));
+        return mermaidCodeExcludingColorSettings
     }
 }
 
@@ -245,12 +286,12 @@ export class CallItemInfo {
      * Tells if the item being called is a function or not, even if you wonder what the hell it can be if not a function.
      */
     public isFunction: boolean = false;
-    
+
     /**
      * The name of the object on which the call is made. For foo.bar(), it's foo.
      */
     public objectName: string = "";
-    
+
     /**
      * Parameters or arguments passed to the callee.
      */
@@ -260,5 +301,5 @@ export class CallItemInfo {
      * The range specifying the locations where the parameters start and end
      */
     public parametersRange!: vscode.Range;
-    
+
 }

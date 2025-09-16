@@ -357,8 +357,6 @@ export class CallAnalyzer {
             // Add the callee object to the list of participants
             callee = this.participants.add(callee);
 
-
-
             // Build up message compartments --------------------------------------------------------------------------------------            
 
             this.messageSequenceNumber =

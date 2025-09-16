@@ -67,7 +67,8 @@ export class SequenceDiagramViewProvider implements vscode.WebviewViewProvider {
           <html lang="en">
           <head>
             <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+           <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=10, user-scalable=yes">
+
             <title>Sequence Diagram</title>
             <style>
               .mermaid { background: #fff; padding: 10px; border-radius: 8px; }
@@ -79,6 +80,7 @@ export class SequenceDiagramViewProvider implements vscode.WebviewViewProvider {
             </style>
             <script type="module">
     import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+    import Panzoom from "https://esm.sh/@panzoom/panzoom";
     mermaid.initialize({
   startOnLoad: true,
   theme: 'forest',
@@ -86,8 +88,52 @@ export class SequenceDiagramViewProvider implements vscode.WebviewViewProvider {
 
     const vscode = acquireVsCodeApi();
 
-    setTimeout(() => {
-        document.querySelectorAll('.messageText').forEach(el => {
+    mermaid.run().then(() => {
+    //     const svg = document.querySelector("#diagram svg");
+    //   const panZoomInstance = panzoom(svg, {
+    //     zoomSpeed: 0.065,
+    //     maxZoom: 5,
+    //     minZoom: 0.5,
+    //   });
+    //   // 中心座標を取得
+    //   const getCenter = () => [
+    //     svg.clientWidth / 2,
+    //     svg.clientHeight / 2
+    //   ];
+
+    //   // ボタン操作
+    //   document.getElementById("zoomIn").onclick = () => {
+    //     const [cx, cy] = getCenter();
+    //     panZoomInstance.smoothZoom(cx, cy, 1.2);
+    //   };
+    //   document.getElementById("zoomOut").onclick = () => {
+    //     const [cx, cy] = getCenter();
+    //     panZoomInstance.smoothZoom(cx, cy, 0.8);
+    //   };
+    //   document.getElementById("reset").onclick = () => {
+    //     panZoomInstance.moveTo(0, 0);
+    //     panZoomInstance.zoomAbs(0, 0, 1);
+    //   };
+        const counts = {};
+            
+        const elements = document.querySelectorAll('.messageText');
+        elements.forEach(el => {
+        const raw=el.textContent.trim();
+        let fn=raw.replace(/^\d+(\.\d+)*:\s*/, "");  // Remove leading numbers like "1:", "2.1:" etc.
+        fn=fn.substring(0,fn.indexOf("("));
+        fn = fn.trim();
+        counts[fn] = (counts[fn] || 0) + 1;
+        console.log("抽出:", raw, "→", fn, counts[fn]);
+    });
+
+        elements.forEach(el => {
+        const raw=el.textContent.trim();
+        let fn=raw.replace(/^\d+(\.\d+)*:\s*/, "");  // Remove leading numbers like "1:", "2.1:" etc.
+        fn=fn.substring(0,fn.indexOf("("));
+        fn = fn.trim();
+        if (counts[fn] >= 3) {
+            el.style.fill = "red";  // or backgroundColor, stroke, etc.
+        }
             el.classList.add('clickable');
             el.addEventListener('click', () => {
                 vscode.postMessage({
@@ -96,7 +142,7 @@ export class SequenceDiagramViewProvider implements vscode.WebviewViewProvider {
                 });
             });
         });
-    }, 1000);
+    });
 </script>
           </head>
         `;
@@ -108,10 +154,17 @@ export class SequenceDiagramViewProvider implements vscode.WebviewViewProvider {
      */
     public body() {
         return `
-          <body>
-            <h1>Sequcence Diagram</h1>
-            <div class="mermaid">
-              ${this._mermaidCode}
+        <body>
+            <div id="controls">
+                <button id="zoomIn">＋</button>
+                <button id="zoomOut">－</button>
+                <button id="reset">reset</button>
+            </div>
+            <h1>Sequence Diagram</h1>
+            <div id="diagram">
+                <div class="mermaid">
+                ${this._mermaidCode}
+                </div>
             </div>
           </body>
         `;
@@ -147,7 +200,6 @@ export class SequenceDiagramViewProvider implements vscode.WebviewViewProvider {
     private async jumpToFunction(functionName: string) {
         functionName = functionName
             .replace(/^(\d+(\.\d+)?:\s*)?/, '')  //remove optional line number prefix
-            .replace(/^def\s+/, '')              //remove 'def' keyword if present
             .replace(/\([\s\S]*\)?$/, '')        //remove arguments and closing parenthesis
             .trim();                             // Clean up whitespace
 

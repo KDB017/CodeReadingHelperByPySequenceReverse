@@ -1,8 +1,8 @@
 {
-    "name": "py-sequence-reverse",
+    "name": "code-reading-helper-by-py-sequence-reverse",
     "displayName": "PySequenceReverse Sequence Diagram Builder for Python",
-    "description": "Create Mermaid speaking sequence diagrams for Python functions",
-    "version": "1.1.0",
+    "description": "Create Mermaid speaking sequence diagrams for Python functions and view them in a webview.",
+    "version": "1.0.0",
     "publisher": "kazu",
     "engines": {
         "vscode": "^1.65.0",
@@ -10,9 +10,6 @@
     },
     "categories": [
         "Visualization"
-    ],
-    "extensionDependencies": [
-        "tomoyukim.vscode-mermaid-editor"
     ],
     "main": "./out/extension.js",
     "activationEvents": [
@@ -96,7 +93,7 @@
                 "py-sequence-reverse.Diagram: include Sequence Numbers": {
                     "description": "Check to include sequence numbers in messages",
                     "type": "boolean",
-                    "default": true
+                    "default": false
                 },
                 "py-sequence-reverse.Diagram: Show Signatures Instead Parameters": {
                     "description": "Check to include the signature of the called function rather than parameter values (only applies when parameters are not omitted).",
@@ -131,14 +128,14 @@
     },
     "repository": {
         "type": "git",
-        "url": "https://github.com/gusztavj/PySequenceReverse.git"
+        "url": "https://github.com/KDB017/CodeReadingHelperByPySequenceReverse"
     },
     "license": "MIT",
     "icon": "art/big-logo.png",
     "bugs": {
-        "url": "https://github.com/gusztavj/PySequenceReverse/issues"
+        "url": ""
     },
-    "homepage": "https://github.com/gusztavj/PySequenceReverse/blob/master/README.md",
+    "homepage": "https://github.com/KDB017/CodeReadingHelperByPySequenceReverse/blob/main/README.md",
     "keywords": [
         "uml",
         "call graph",
@@ -148,6 +145,7 @@
         "reverse engineering"
     ],
     "dependencies": {
+        "@panzoom/panzoom": "^4.6.0",
         "concat-map": "^0.0.2",
         "minimatch": "^9.0.3",
         "sanitize-filename": "^1.6.3",

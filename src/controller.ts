@@ -4,6 +4,7 @@ import { SequenceDiagramModel } from './entities';
 import { CallAnalyzer } from './call-analyzer';
 import { CodeAnalyzer } from './code-analyzer';
 import { SequenceDiagramViewProvider } from './sequence-diagram-view-provider'
+import { Logger } from './logging';
 
 
 
@@ -51,6 +52,7 @@ export class Controller {
 
         // Have the diagram text composed
         await sdm.composeDiagram();
+        Logger.log(`Generated Mermaid Code:\n${sdm.contents()}`);
         // this.sequenceDiagramViewProvider.setMermaidCode(sdm.contents());
         this.sequenceDiagramViewProvider.updateDiagram(sdm.contents());
     }
