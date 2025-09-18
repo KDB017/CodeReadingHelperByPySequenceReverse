@@ -1,6 +1,5 @@
 import * as vscode from 'vscode';
 
-import { Logger } from './logging';
 // ################################################################################################################################
 /**
  * html for displaying webView.
@@ -63,8 +62,8 @@ export class HtmlProvider{
      * @returns The head section of the HTML content.
      */
     public head() {
-        let thresholds_Orange = vscode.workspace.getConfiguration().get<number>('py-sequence-reverse.Thresholds: Thresholds for Orange') ?? 3; 
-        let thresholds_Red = vscode.workspace.getConfiguration().get<number>('py-sequence-reverse.Thresholds: Thresholds for Red') ?? 10;
+        let thresholdsOrange = vscode.workspace.getConfiguration().get<number>('py-sequence-reverse.Thresholds: Thresholds for Orange') ?? 3; 
+        let thresholdsRed = vscode.workspace.getConfiguration().get<number>('py-sequence-reverse.Thresholds: Thresholds for Red') ?? 10;
         return `
         <!DOCTYPE html>
           <html lang="en">
@@ -117,10 +116,10 @@ export class HtmlProvider{
         if (fn===""){
             return;
         }
-        if (counts[fn] >= ${thresholds_Orange}) {
+        if (counts[fn] >= ${thresholdsOrange}) {
             element.style.fill = "orange";  // or backgroundColor, stroke, etc.
         }
-        if (counts[fn] >= ${thresholds_Red}) {
+        if (counts[fn] >= ${thresholdsRed}) {
             element.style.fill = "red";  // or backgroundColor, stroke, etc.
         }
 
