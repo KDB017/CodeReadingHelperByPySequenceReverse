@@ -1,5 +1,4 @@
 import { CallHierarchyItem, ExtensionContext } from 'vscode';
-
 import { SequenceDiagramModel } from './entities';
 import { CallAnalyzer } from './call-analyzer';
 import { CodeAnalyzer } from './code-analyzer';
@@ -55,6 +54,7 @@ export class Controller {
         Logger.log(`Generated Mermaid Code:\n${sdm.contents()}`);
         // this.sequenceDiagramViewProvider.setMermaidCode(sdm.contents());
         this.sequenceDiagramViewProvider.updateDiagram(sdm.contents());
+        
     }
 
     // ****************************************************************************************************************************

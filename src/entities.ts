@@ -2,7 +2,6 @@ import * as vscode from 'vscode'
 // import sanitize = require('sanitize-filename');
 import { CallAnalyzer } from './call-analyzer';
 import { CodeAnalyzer } from './code-analyzer';
-import { Logger } from './logging';
 
 // ################################################################################################################################
 /**
@@ -228,48 +227,48 @@ export class SequenceDiagramModel {
 
 
         this._contents = combinedStr;
-        const test = this.numberOfTimesTheFunctionIsCalled(combinedStr)
+        // const test = this.numberOfTimesTheFunctionIsCalled(combinedStr)
         return combinedStr;
     }
 
 
-    public numberOfTimesTheFunctionIsCalled(mermaidCodeExcludingColorSettings: string) {
+    // public numberOfTimesTheFunctionIsCalled(mermaidCodeExcludingColorSettings: string) {
 
-        // Create a map to hold participant IDs and their corresponding names
-        // let participantMap: Record<string, string> = {};
-        // const participantRegex = /^\s*participant\s+(\w+)(?:\s+as\s+(\w+))?/gm;
-        // let match = null;
-        // while ((match = participantRegex.exec(mermaidCodeExcludingColorSettings)) !== null) {
-        //     let key = match[1];
-        //     let value = match[2] || match[1];
-        //     Logger.log("match:" + JSON.stringify(match));
-        //     participantMap[key] = value;
-        // }
+    //     // Create a map to hold participant IDs and their corresponding names
+    //     // let participantMap: Record<string, string> = {};
+    //     // const participantRegex = /^\s*participant\s+(\w+)(?:\s+as\s+(\w+))?/gm;
+    //     // let match = null;
+    //     // while ((match = participantRegex.exec(mermaidCodeExcludingColorSettings)) !== null) {
+    //     //     let key = match[1];
+    //     //     let value = match[2] || match[1];
+    //     //     Logger.log("match:" + JSON.stringify(match));
+    //     //     participantMap[key] = value;
+    //     // }
 
 
-        // Logger.log("participantMap:" + JSON.stringify(participantMap));
-        // Logger.log("mermaidCodeExcludingColorSettings:" + mermaidCodeExcludingColorSettings);
+    //     // Logger.log("participantMap:" + JSON.stringify(participantMap));
+    //     // Logger.log("mermaidCodeExcludingColorSettings:" + mermaidCodeExcludingColorSettings);
 
-        // const callRegex = /p(\d+) -+>>[+-] p(\d+):\s*(\w+)\(/gm;
-        // let callMatch;
-        // let callCount: Record<string, number> = {};
+    //     // const callRegex = /p(\d+) -+>>[+-] p(\d+):\s*(\w+)\(/gm;
+    //     // let callMatch;
+    //     // let callCount: Record<string, number> = {};
 
-        // while ((callMatch = callRegex.exec(mermaidCodeExcludingColorSettings)) !== null) {
-        //     Logger.log("callMatch:" + JSON.stringify(callMatch));
-        //     const from = callMatch[1];
-        //     const to = callMatch[2];
-        //     const func = callMatch[3];  // foo, bar など
+    //     // while ((callMatch = callRegex.exec(mermaidCodeExcludingColorSettings)) !== null) {
+    //     //     Logger.log("callMatch:" + JSON.stringify(callMatch));
+    //     //     const from = callMatch[1];
+    //     //     const to = callMatch[2];
+    //     //     const func = callMatch[3];  // foo, bar など
 
-        //     // 呼び出し回数をカウント
-        //     callCount[func] = (callCount[func] ?? 0) + 1;
+    //     //     // 呼び出し回数をカウント
+    //     //     callCount[func] = (callCount[func] ?? 0) + 1;
 
-        //     Logger.log(`${participantMap[from] ?? from} -> ${participantMap[to] ?? to}: ${func}()`);
-        // }
+    //     //     Logger.log(`${participantMap[from] ?? from} -> ${participantMap[to] ?? to}: ${func}()`);
+    //     // }
 
-        // Logger.log("callCount:" + JSON.stringify(callCount));
-        Logger.log("mermaidCodeExcludingColorSettings:" + mermaidCodeExcludingColorSettings.split("\n"));
-        return mermaidCodeExcludingColorSettings
-    }
+    //     // Logger.log("callCount:" + JSON.stringify(callCount));
+    //     Logger.log("mermaidCodeExcludingColorSettings:" + mermaidCodeExcludingColorSettings.split("\n"));
+    //     return mermaidCodeExcludingColorSettings
+    // }
 }
 
 

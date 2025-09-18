@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import {Logger} from './logging';
 
 // ################################################################################################################################
 /**
@@ -7,6 +8,7 @@ import * as vscode from 'vscode';
 export class SequenceDiagramViewProvider implements vscode.WebviewViewProvider {
     private _view?: vscode.WebviewView;
     private _mermaidCode: string = '';
+    private _script: vscode.Uri = vscode.Uri.file(''); // Placeholder for the script URI
 
     /**
      * Initializes a new instance of the SequenceDiagramViewProvider class.
@@ -23,8 +25,19 @@ export class SequenceDiagramViewProvider implements vscode.WebviewViewProvider {
         this._view = webviewView;
 
         // Allow scripts in the webview
-        webviewView.webview.options = { enableScripts: true };
 
+        webviewView.webview.options = { 
+            localResourceRoots: [vscode.Uri.joinPath(this.extensionUri, 'media')],
+            enableScripts: true };
+        
+
+        const scriptPath = vscode.Uri.joinPath(this.extensionUri, 'media', 'events.js');
+        this._script = this._view.webview.asWebviewUri(scriptPath);
+
+        // this._scripts.push(script);
+        
+        Logger.log(`Script Path: ${scriptPath}`);
+        Logger.log(`Script URI: ${this._script}`);
         // Set the  HTML content
         webviewView.webview.html = this.getHtml();
 
@@ -41,7 +54,7 @@ export class SequenceDiagramViewProvider implements vscode.WebviewViewProvider {
      * Generates the complete HTML content for the webview.
      * @returns The complete HTML content as a string.
      */
-    public getHtml() {
+    public getHtml(): string {
         return `
           ${this.head()}
           ${this.body()}
@@ -89,56 +102,43 @@ export class SequenceDiagramViewProvider implements vscode.WebviewViewProvider {
     const vscode = acquireVsCodeApi();
 
     mermaid.run().then(() => {
-    //     const svg = document.querySelector("#diagram svg");
-    //   const panZoomInstance = panzoom(svg, {
-    //     zoomSpeed: 0.065,
-    //     maxZoom: 5,
-    //     minZoom: 0.5,
-    //   });
-    //   // 中心座標を取得
-    //   const getCenter = () => [
-    //     svg.clientWidth / 2,
-    //     svg.clientHeight / 2
-    //   ];
-
-    //   // ボタン操作
-    //   document.getElementById("zoomIn").onclick = () => {
-    //     const [cx, cy] = getCenter();
-    //     panZoomInstance.smoothZoom(cx, cy, 1.2);
-    //   };
-    //   document.getElementById("zoomOut").onclick = () => {
-    //     const [cx, cy] = getCenter();
-    //     panZoomInstance.smoothZoom(cx, cy, 0.8);
-    //   };
-    //   document.getElementById("reset").onclick = () => {
-    //     panZoomInstance.moveTo(0, 0);
-    //     panZoomInstance.zoomAbs(0, 0, 1);
-    //   };
+    
         const counts = {};
             
         const elements = document.querySelectorAll('.messageText');
-        elements.forEach(el => {
-        const raw=el.textContent.trim();
-        let fn=raw.replace(/^\d+(\.\d+)*:\s*/, "");  // Remove leading numbers like "1:", "2.1:" etc.
+        elements.forEach(element => {
+        const raw=element.textContent
+        const colonIndex=raw.indexOf(":");
+
+        let fn=raw.substring(colonIndex+1);  // Remove leading numbers like "1:", "2.1:" etc.
         fn=fn.substring(0,fn.indexOf("("));
         fn = fn.trim();
         counts[fn] = (counts[fn] || 0) + 1;
-        console.log("抽出:", raw, "→", fn, counts[fn]);
+        console.log("抽出:",raw, "→",fn, counts[fn]);
     });
 
-        elements.forEach(el => {
-        const raw=el.textContent.trim();
-        let fn=raw.replace(/^\d+(\.\d+)*:\s*/, "");  // Remove leading numbers like "1:", "2.1:" etc.
+        elements.forEach(element => {
+       const raw=element.textContent
+        const colonIndex=raw.indexOf(":");
+
+        let fn=raw.substring(colonIndex+1);  // Remove leading numbers like "1:", "2.1:" etc.
         fn=fn.substring(0,fn.indexOf("("));
         fn = fn.trim();
-        if (counts[fn] >= 3) {
-            el.style.fill = "red";  // or backgroundColor, stroke, etc.
+        if (fn===""){
+            return;
         }
-            el.classList.add('clickable');
-            el.addEventListener('click', () => {
+        if (counts[fn] >= 3) {
+            element.style.fill = "orange";  // or backgroundColor, stroke, etc.
+        }
+        if (counts[fn] >= 10) {
+            element.style.fill = "red";  // or backgroundColor, stroke, etc.
+        }
+
+            element.classList.add('clickable');
+            element.addEventListener('click', () => {
                 vscode.postMessage({
                     command: 'jumpToFunction',
-                    functionName: el.textContent.trim()
+                    functionName: fn
                 });
             });
         });
@@ -166,6 +166,7 @@ export class SequenceDiagramViewProvider implements vscode.WebviewViewProvider {
                 ${this._mermaidCode}
                 </div>
             </div>
+            <script type='module' src='${this._script}'></script>
           </body>
         `;
     }
@@ -176,8 +177,6 @@ export class SequenceDiagramViewProvider implements vscode.WebviewViewProvider {
      */
     public foot() {
         return `
-          <footer>
-          </footer>
         </html>
         `;
     }
@@ -198,10 +197,10 @@ export class SequenceDiagramViewProvider implements vscode.WebviewViewProvider {
      * @param functionName - The name of the function to jump to.
      */
     private async jumpToFunction(functionName: string) {
-        functionName = functionName
-            .replace(/^(\d+(\.\d+)?:\s*)?/, '')  //remove optional line number prefix
-            .replace(/\([\s\S]*\)?$/, '')        //remove arguments and closing parenthesis
-            .trim();                             // Clean up whitespace
+        // functionName = functionName
+        //     .replace(/^(\d+(\.\d+)?:\s*)?/, '')  //remove optional line number prefix
+        //     .replace(/\([\s\S]*\)?$/, '')        //remove arguments and closing parenthesis
+        //     .trim();                             // Clean up whitespace
 
 
         vscode.window.showInformationMessage(`Jumping to function: ${functionName}`);
