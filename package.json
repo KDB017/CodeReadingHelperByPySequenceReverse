@@ -104,6 +104,25 @@
                     "description": "Label to show on return messages. To comply with Mermaid, the empty value is replaced by a space.",
                     "type": "string",
                     "default": "return value"
+                },
+                "py-sequence-reverse.Diagram: Display Mode": {
+                    "type": "string",
+                    "enum": [
+                        "view",
+                        "panel"
+                    ],
+                    "default": "view",
+                    "description": "Select display method (view = side bar, panel = editor panel)"
+                },
+                "py-sequence-reverse.Thresholds: Thresholds for Orange": {
+                    "type": "number",
+                    "default": 3,
+                    "description": "Threshold for orange color coding"
+                },
+                "py-sequence-reverse.Thresholds: Thresholds for Red": {
+                    "type": "number",
+                    "default": 10,
+                    "description": "Threshold for red color coding"
                 }
             }
         }

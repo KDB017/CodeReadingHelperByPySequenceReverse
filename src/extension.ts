@@ -3,7 +3,7 @@ import { Controller } from './controller'
 import { SequenceDiagramViewProvider } from './sequence-diagram-view-provider'
 
 export const output = vscode.window.createOutputChannel('PySequenceReverse')
-
+// todo create superclass of SequenceDiagramViewProvider and SequenceDiagramPanel
 // ################################################################################################################################
 /**
  * Returns the default progress options for a notification progress bar.
@@ -48,22 +48,31 @@ const getDefaultProgressOptions = (title: string): vscode.ProgressOptions => {
 // }
 
 export function activate(context: vscode.ExtensionContext) {
-
-    let webviewProvider = new SequenceDiagramViewProvider(context.extensionUri);
-    context.subscriptions.push(
+    const displayMode = vscode.workspace.getConfiguration().get<string>('sequenceDiagram.displayMode: choice of display mode') ?? 'view';
+    //todo
+    const test = (x: any) => (x);
+    test(displayMode);
+    //todo end
+    
+    let display = new SequenceDiagramViewProvider(context.extensionUri);
+        
+        context.subscriptions.push(
         vscode.window.registerWebviewViewProvider(
             // 👇 package.jsonに記述したviewsのidを設定する 👇
             "myExtension.view",
-            webviewProvider,
+            display,
         ),
     );
+
+    
+    
     const commandDisposable = vscode.commands.registerCommand(
         'PySequenceReverse.createSequenceDiagram',
         async () => {
             vscode.window.withProgress(
                 getDefaultProgressOptions('Generate sequence diagram'),
 
-                new Controller(webviewProvider).generateSequenceDiagram(context)
+                new Controller(display).generateSequenceDiagram(context)
             )
         }
     )
