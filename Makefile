@@ -8,5 +8,7 @@ compile:
 	$(YARN) compile
 lint:
 	$(YARN) lint
+unittest:
+	$(YARN) unittest
 
 

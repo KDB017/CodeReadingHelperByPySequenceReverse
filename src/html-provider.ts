@@ -21,11 +21,6 @@ export class HtmlProvider{
          */
         private _script: vscode.Uri; // Placeholder for the script URI
 
-        /**
-         * Initializes a new instance of the HtmlProvider class.
-         * @param mermaidCode - The Mermaid code to be displayed in the webview.
-         */
-
 
         /**
          * Initializes a new instance of the HtmlProvider class.
